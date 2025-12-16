@@ -87,15 +87,11 @@ All outputs are written as Excel files to support direct review by HR, Finance, 
 
 | File | Description |
 |----|----|
-| `employees.xlsx` | Employee master data |
-| `comp_history.xlsx` | Compensation history by employee-period |
-| `perf_history.xlsx` | Performance history by employee-period |
 | `panel_scored.xlsx` | Employee-period panel with attrition risk scores |
 | `panel_scores_min.xlsx` | Minimal employee-period risk output for operational use |
 | `bu_period_features.xlsx` | Aggregated business-unit period features derived from employee risk |
 | `bu_period_scored.xlsx` | Business-unit period attrition risk scores |
 | `bu_period_kpi_scored.xlsx` | Business-unit risk aligned to selected KPIs |
-| `business_kpi.xlsx` | Business KPI reference data |
 | `kpi_impact_output.xlsx` | KPI exposure signals associated with workforce risk |
 | `kpi_impact_summary.xlsx` | Executive-level KPI risk summary |
 
