@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impact Recov | Production Attrition Risk and Recovery Signals</title>
+  <meta name="description" content="A production-grade, time-aware attrition risk pipeline that builds a full-history employee-period signals layer, scores risk reliably, and supports action targeting with coverage and join integrity checks." />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#101a33;
+      --text:#e7ecff;
+      --muted:#b7c2ff;
+      --line:rgba(231,236,255,0.14);
+      --accent:#7aa2ff;
+      --accent2:#8ef0d0;
+      --shadow: 0 12px 32px rgba(0,0,0,0.35);
+      --radius: 16px;
+      --max: 1100px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(900px 500px at 20% 0%, rgba(122,162,255,0.18), transparent 60%),
+                  radial-gradient(900px 500px at 80% 0%, rgba(142,240,208,0.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--text); text-decoration:none}
+    a:hover{color:white}
+
+    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 70px;}
+
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 12px; border:1px solid var(--line);
+      border-radius: 14px; background: rgba(16,26,51,0.55); backdrop-filter: blur(6px);
+      box-shadow: var(--shadow);
+    }
+    .brand{display:flex; align-items:center; gap:10px;}
+    .dot{width:12px; height:12px; border-radius:50%; background: linear-gradient(135deg, var(--accent), var(--accent2));}
+    .brand b{font-weight:700; letter-spacing:0.2px}
+    .nav{display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end}
+    .nav a{font-size:14px; color:var(--muted); padding:8px 10px; border-radius:12px}
+    .nav a:hover{background: rgba(231,236,255,0.06); color:var(--text)}
+
+    .hero{padding:40px 6px 18px}
+    .kicker{color:var(--muted); font-size:14px; letter-spacing:0.3px; text-transform:uppercase}
+    h1{margin:10px 0 10px; font-size:38px; line-height:1.1}
+    .subtitle{max-width: 860px; font-size:17px; color:var(--muted)}
+
+    .ctaRow{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:12px 14px; border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(231,236,255,0.06);
+      color:var(--text);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      font-weight:600;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(122,162,255,0.25), rgba(142,240,208,0.18));
+      border-color: rgba(122,162,255,0.35);
+    }
+    .btn small{color:var(--muted); font-weight:500}
+
+    .grid{display:grid; grid-template-columns: 1.2fr 0.8fr; gap:16px; margin-top:18px}
+    .twoCol{display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px}
+    @media (max-width: 900px){
+      .grid{grid-template-columns: 1fr;}
+      .twoCol{grid-template-columns: 1fr;}
+      h1{font-size:32px}
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(16,26,51,0.55);
+      backdrop-filter: blur(6px);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .card h3{margin:14px 0 8px; font-size:15px; color: var(--text)}
+    .card p{margin:0; color: var(--muted)}
+
+    .pillRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .pill{
+      font-size:12px;
+      color: var(--text);
+      background: rgba(231,236,255,0.06);
+      border:1px solid var(--line);
+      padding:7px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .section{margin-top:16px}
+    .list{margin:10px 0 0; padding-left:18px; color: var(--muted)}
+    .list li{margin:6px 0}
+
+    .metricBox{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding:12px 12px;
+      background: rgba(231,236,255,0.05);
+      margin-top:10px;
+    }
+    .metricBox b{display:block; margin-bottom:4px}
+
+    .note{
+      margin-top:10px;
+      padding:10px 12px;
+      border:1px dashed rgba(231,236,255,0.22);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(231,236,255,0.04);
+      font-size: 13px;
+    }
+
+    .code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: #eaf1ff;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(231,236,255,0.12);
+      border-radius: 14px;
+      padding: 12px;
+      overflow-x: auto;
+      margin-top: 10px;
+      line-height: 1.45;
+      white-space: pre;
+    }
+
+    .footer{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      color: rgba(231,236,255,0.6);
+      font-size: 13px;
+      padding: 10px 4px;
+    }
+    .footer a{color: rgba(231,236,255,0.7)}
+    .footer a:hover{color: var(--text)}
+
+    .fitTable{
+      margin-top:10px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      overflow:hidden;
+      background: rgba(231,236,255,0.04);
+    }
+    .fitRow{
+      display:grid;
+      grid-template-columns: 1.4fr 0.6fr;
+      gap:10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(231,236,255,0.10);
+    }
+    .fitRow:first-child{border-top:none}
+    .fitHeader{
+      background: rgba(231,236,255,0.05);
+    }
+    .fitHeader .fitCell{
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .fitCell{
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(231,236,255,0.18);
+      background: rgba(231,236,255,0.06);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tag.good{
+      border-color: rgba(142,240,208,0.35);
+      background: rgba(142,240,208,0.12);
+    }
+    .tag.strong{
+      border-color: rgba(122,162,255,0.35);
+      background: rgba(122,162,255,0.12);
+    }
+    .tag.warn{
+      border-color: rgba(231,236,255,0.22);
+      background: rgba(0,0,0,0.18);
+      color: rgba(231,236,255,0.82);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div><b>Impact Recov</b></div>
+      </div>
+      <div class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#readiness">Strength</a>
+      </div>
+    </div>
+
+    <div class="hero" id="overview">
+      <div class="kicker">Attrition risk detection with recovery-grade signals</div>
+      <h1>Production-grade attrition risk scoring with full-history signals and join integrity checks</h1>
+      <div class="subtitle">
+        A time-aware modeling pipeline designed to <b>build or refresh employee-period signals</b>,
+        validate coverage, score attrition risk, and produce action-ready outputs for leaders.
+        Built for operational reliability and auditability, not one-off notebooks.
+      </div>
+
+      <div class="ctaRow">
+        <a class="btn primary" href="https://github.com/ryanbrush30" target="_blank" rel="noreferrer">
+          View repository <small>code + docs</small>
+        </a>
+        <a class="btn" href="#outputs">
+          Understand outputs <small>what the files mean</small>
+        </a>
+        <a class="btn" href="#readiness">
+          See strength <small>why this is production ready</small>
+        </a>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>What this answers</h2>
+          <p>
+            Impact Recov is built to answer operational questions that leaders ask every week:
+            who is at risk, where risk is concentrating, what signals are driving it, and how reliably the pipeline
+            can refresh scores without breaking on missing files or partial coverage.
+          </p>
+
+          <div class="pillRow">
+            <span class="pill">Time-aware employee-period panel</span>
+            <span class="pill">Full-history signals build</span>
+            <span class="pill">Coverage and key match checks</span>
+            <span class="pill">Operational scoring outputs</span>
+            <span class="pill">Leakage guardrails</span>
+            <span class="pill">Production-first artifact writing</span>
+          </div>
+
+          <div class="section" id="capabilities">
+            <h3>Core capabilities</h3>
+            <ul class="list">
+              <li><b>Builds signals if missing:</b> automatically creates a full-history employee-period signals file when it is not found, so the pipeline runs end-to-end.</li>
+              <li><b>Coverage validation:</b> checks panel and signals date ranges, unique employee-period match rate, and non-null rates for critical fields.</li>
+              <li><b>Robust joins:</b> designed to prevent silent join failures and to surface integrity issues early (coverage, keys, missingness).</li>
+              <li><b>Action outputs:</b> produces minimal scoring tables to power action lists, dashboards, and workflow triggers.</li>
+              <li><b>Signal-rich risk:</b> supports manager and behavior signals like manager_id, overtime hours, PTO usage and availability, internal transfer flags, and job change flags.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Core outputs</h2>
+
+          <div class="metricBox">
+            <b>Attrition risk scores</b>
+            <div style="color:var(--muted);">
+              Employee-period risk scores aligned to a forward-looking horizon label (stay or leave in horizon),
+              designed to support targeting and prioritization.
+            </div>
+          </div>
+
+          <div class="metricBox">
+            <b>Signals layer (full history)</b>
+            <div style="color:var(--muted);">
+              A consolidated employee-period signals dataset built from historical sources, aligned to the panel timeline.
+            </div>
+          </div>
+
+          <div class="metricBox">
+            <b>Join quality report</b>
+            <div style="color:var(--muted);">
+              Match rate and non-null diagnostics for key signals so you can trust scoring completeness.
+            </div>
+          </div>
+
+          <div class="metricBox">
+            <b>Operational extracts</b>
+            <div style="color:var(--muted);">
+              Minimal scoring output (employee, period, org unit, risk, key drivers) suitable for dashboards and interventions.
+            </div>
+          </div>
+
+          <div class="note">
+            Strength focus: reliability, coverage, and repeatable end-to-end execution, including artifact creation when inputs are absent.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="twoCol" id="readiness">
+      <div class="card">
+        <h2>Strength and why it is production grade</h2>
+        <ul class="list">
+          <li><b>End-to-end survivability:</b> missing signals files do not stop execution. The pipeline can build what it needs.</li>
+          <li><b>Data integrity checks:</b> explicit match-rate and non-null rate reporting prevents silent failure modes.</li>
+          <li><b>Time alignment:</b> employee-period features and labels are designed to reduce future leakage risk.</li>
+          <li><b>Actionable outputs:</b> scoring tables are structured for operational use, not just model evaluation.</li>
+          <li><b>Extensible signals:</b> built to absorb additional features like manager turnover, pay change, compa change, promotion flags, and performance trends without redesigning the pipeline.</li>
+        </ul>
+
+        <div class="note">
+          This is decision support. It is designed to rank and concentrate risk for intervention targeting.
+          Causal claims require a separate intervention design.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Use case fit</h2>
+
+        <div class="fitTable" role="table" aria-label="Use case fit table">
+          <div class="fitRow fitHeader" role="row">
+            <div class="fitCell" role="columnheader">Use Case</div>
+            <div class="fitCell" role="columnheader">Fit</div>
+          </div>
+
+          <div class="fitRow" role="row">
+            <div class="fitCell" role="cell">Risk identification</div>
+            <div class="fitCell" role="cell"><span class="tag good">Excellent</span></div>
+          </div>
+
+          <div class="fitRow" role="row">
+            <div class="fitCell" role="cell">Operational targeting and prioritization</div>
+            <div class="fitCell" role="cell"><span class="tag good">Excellent</span></div>
+          </div>
+
+          <div class="fitRow" role="row">
+            <div class="fitCell" role="cell">Workforce stability monitoring</div>
+            <div class="fitCell" role="cell"><span class="tag strong">Very strong</span></div>
+          </div>
+
+          <div class="fitRow" role="row">
+            <div class="fitCell" role="cell">Automated recurring scoring</div>
+            <div class="fitCell" role="cell"><span class="tag strong">Very strong</span></div>
+          </div>
+
+          <div class="fitRow" role="row">
+            <div class="fitCell" role="cell">Policy causality</div>
+            <div class="fitCell" role="cell"><span class="tag warn">Out of scope (by design)</span></div>
+          </div>
+        </div>
+
+        <div class="note">
+          The model is strongest when used to focus leader attention on the highest-risk pockets and the signals driving them.
+        </div>
+      </div>
+    </div>
+
+    <div class="card section" id="outputs">
+      <h2>Outputs and what they mean</h2>
+      <ul class="list">
+        <li><b>artifacts/employee_period_panel.csv:</b> employee-period panel used for training and scoring (time-aware).</li>
+        <li><b>data/employee_period_signals_full.csv:</b> full-history signals layer aligned to the panel timeline.</li>
+        <li><b>artifacts/panel_scored.csv:</b> panel with features plus risk scores and any diagnostics needed for review.</li>
+        <li><b>artifacts/panel_scores_min.csv:</b> minimal scoring output for action lists and dashboards.</li>
+        <li><b>artifacts/join_quality_report.csv:</b> match rate and non-null diagnostics for key signal fields (recommended).</li>
+      </ul>
+
+      <div class="note">
+        Recommendation: keep the join quality report as a first-class artifact so you can show reliability to leaders and reviewers.
+      </div>
+    </div>
+
+    <div class="twoCol section" id="example">
+      <div class="card">
+        <h2>Example: coverage and join integrity checks</h2>
+        <p>
+          A simple pattern to log match rate and non-null rates that supports operational trust.
+        </p>
+
+        <div class="code">import pandas as pd
+
+panel = pd.read_csv("artifacts/employee_period_panel.csv")
+signals = pd.read_csv("data/employee_period_signals_full.csv")
+
+# Match rate on unique employee-period keys
+panel_keys = panel[["employee_id", "period_start"]].drop_duplicates()
+sig_keys = signals[["employee_id", "period_start"]].drop_duplicates()
+match = panel_keys.merge(sig_keys, on=["employee_id", "period_start"], how="left", indicator=True)
+match_rate = (match["_merge"] == "both").mean()
+
+print(f"Signals key match rate (unique emp-period): {match_rate:.3f}")
+
+# Non-null rate checks for critical fields after join
+joined = panel.merge(signals, on=["employee_id", "period_start"], how="left")
+for col in ["manager_id","overtime_hours","pto_hours_used","pto_hours_available","internal_transfer_flag","job_change_flag"]:
+    if col in joined.columns:
+        nn = joined[col].notna().mean()
+        print(f"{col} non-null rate: {nn:.3f}")</div>
+
+        <div class="note">
+          Strength signal: if match rate is near 1.0 and key fields remain highly non-null, scoring is operationally reliable.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>How this improves on the old pattern</h2>
+        <ul class="list">
+          <li><b>Fewer pipeline breaks:</b> artifacts can be created when absent instead of failing fast on missing files.</li>
+          <li><b>More trustworthy scoring:</b> explicit coverage and join checks replace assumption-based merges.</li>
+          <li><b>More usable outputs:</b> minimal scoring tables support real workflows and dashboards.</li>
+          <li><b>More extensible:</b> the signals layer becomes the stable contract for adding new features over time.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>© 2025 Ryan Brush. All rights reserved.</div>
+      <div>
+        <a href="https://github.com/ryanbrush30" target="_blank" rel="noreferrer">Repository</a>
+        <span style="opacity:0.6;"> | </span>
+        <a href="#overview">Top</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
