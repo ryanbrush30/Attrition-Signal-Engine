@@ -2,12 +2,12 @@
 
 **Production-Grade Attrition Risk Modeling with Full-History Signals and Join Integrity Checks**
 
-Impact Recov is a time-aware, production-first attrition risk pipeline designed to **reliably score employee attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.  
+Attrition Signal Engine  is a time-aware, production-first attrition risk pipeline designed to **reliably score employee attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.  
 It is built to run end-to-end in real environments, not as a one-off notebook.
 
 ---
 
-## What Impact Recov Solves
+## What Attrition Signal Engine Solves
 
 Most attrition models fail in production because of:
 - Missing or partial feature files
@@ -15,7 +15,7 @@ Most attrition models fail in production because of:
 - Misaligned time windows
 - Outputs that are not operationally usable
 
-Impact Recov addresses these failure modes directly.
+Attrition Signal Engine  addresses these failure modes directly.
 
 It answers questions leaders actually ask:
 - Who is at risk right now?
@@ -38,7 +38,7 @@ It answers questions leaders actually ask:
 ## Key Capabilities
 
 ### 1. Full-History Signals Construction
-If the signals file is missing, Impact Recov **builds it automatically** instead of failing.
+If the signals file is missing, Attrition Signal Engine  **builds it automatically** instead of failing.
 
 - Constructs an employee-period signals layer aligned to the panel timeline
 - Supports behavior, manager, and employment movement signals
@@ -50,7 +50,7 @@ If the signals file is missing, Impact Recov **builds it automatically** instead
 - Guards against common leakage patterns
 
 ### 3. Coverage and Join Integrity Checks
-Impact Recov explicitly validates:
+Attrition Signal Engine  explicitly validates:
 
 - Date range alignment between panel and signals
 - Unique employee-period key match rate
