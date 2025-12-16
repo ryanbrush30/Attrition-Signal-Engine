@@ -1,7 +1,7 @@
-# Attrition Signal Engine  
+# Attrition & KPI Signal Engine
 **Production-Grade Attrition Risk Modeling with Signal Integrity and KPI Alignment**
 
-Attrition Signal Engine is a time-aware, production-first workforce risk modeling system designed to **reliably identify, score, and aggregate attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.
+Attrition & KPI Signal Engine is a time-aware, production-first workforce risk modeling system designed to **reliably identify, score, and aggregate attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.
 
 It is built to run end-to-end in real operating environments, producing **actionable employee-, business-unit-, and KPI-aligned outputs**, not one-off notebook results.
 
