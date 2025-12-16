@@ -1,128 +1,134 @@
-# Attrition-Signal-Engine
+# Attrition Signal Engine  
+**Production-Grade Attrition Risk Modeling with Signal Integrity and KPI Alignment**
 
-**Production-Grade Attrition Risk Modeling with Full-History Signals and Join Integrity Checks**
+Attrition Signal Engine is a time-aware, production-first workforce risk modeling system designed to **reliably identify, score, and aggregate attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.
 
-Attrition Signal Engine  is a time-aware, production-first attrition risk pipeline designed to **reliably score employee attrition risk** while enforcing **data coverage, join integrity, and operational survivability**.  
-It is built to run end-to-end in real environments, not as a one-off notebook.
+It is built to run end-to-end in real operating environments, producing **actionable employee-, business-unit-, and KPI-aligned outputs**, not one-off notebook results.
 
 ---
 
 ## What Attrition Signal Engine Solves
 
-Most attrition models fail in production because of:
+Most attrition models fail in production due to:
 - Missing or partial feature files
 - Silent join failures
 - Misaligned time windows
 - Outputs that are not operationally usable
 
-Attrition Signal Engine  addresses these failure modes directly.
+Attrition Signal Engine addresses these failure modes directly by prioritizing **robust execution, explicit validation, and usable outputs**.
 
 It answers questions leaders actually ask:
-- Who is at risk right now?
-- Where is risk concentrating?
-- Which signals are driving risk?
+- Who is at elevated attrition risk right now?
+- Where is risk concentrating across teams or business units?
+- Which signals are associated with elevated risk?
+- How does workforce risk align with key business KPIs?
 - Can this pipeline run repeatedly without breaking?
 
 ---
 
 ## Core Design Principles
 
-- **Production survivability over academic purity**
-- **Time-aware feature and label alignment**
-- **Explicit coverage and join integrity checks**
-- **Operational outputs first**
-- **Extensible signals without pipeline redesign**
+- Production survivability over academic purity  
+- Time-aware feature and label alignment  
+- Explicit coverage and join integrity checks  
+- Operational outputs first  
+- Extensible signals without pipeline redesign  
+- Clear separation between risk signals and causal claims  
 
 ---
 
 ## Key Capabilities
 
 ### 1. Full-History Signals Construction
-If the signals file is missing, Attrition Signal Engine  **builds it automatically** instead of failing.
+If required signals are missing, the system can construct them instead of failing.
 
-- Constructs an employee-period signals layer aligned to the panel timeline
-- Supports behavior, manager, and employment movement signals
-- Designed as a stable contract for future feature expansion
+- Builds employee-period signal layers aligned to the modeling timeline
+- Supports compensation, performance, manager, and behavioral signals
+- Establishes a stable contract for future feature expansion
 
 ### 2. Time-Aware Employee-Period Panel
-- Employee data is structured as an employee-period panel
-- Labels are forward-looking (stay or leave in horizon)
-- Guards against common leakage patterns
+- Employee data is modeled as an employee-period panel
+- Labels are forward-looking (stay or leave within a defined horizon)
+- Designed to reduce common leakage patterns
 
 ### 3. Coverage and Join Integrity Checks
-Attrition Signal Engine  explicitly validates:
+The system explicitly validates:
+- Date range alignment across sources
+- Unique employee-period key match rates
+- Non-null rates for critical signals after joins
 
-- Date range alignment between panel and signals
-- Unique employee-period key match rate
-- Non-null rates for critical signals after join
-
-These diagnostics are logged and can be written as artifacts.
+These checks prevent silent data failures and improve trust in outputs.
 
 ### 4. Signal-Rich Attrition Risk Scoring
 Supports signals such as:
-- Manager ID
-- Overtime hours
-- PTO usage and availability
-- Internal transfer flag
-- Job change flag
+- Compensation history
+- Performance history
+- Manager assignment
+- Overtime and PTO usage
+- Internal transfers and job changes
 
-The model is designed to absorb additional signals like:
-- Manager turnover
-- Pay change and compa change
-- Promotion flags
-- Performance trends
+Additional signals can be introduced without redesigning the pipeline.
 
-### 5. Operational Outputs
-Produces minimal, clean outputs designed for:
-- Dashboards
-- Action lists
-- Workflow triggers
-- Executive review
+### 5. Aggregation and KPI Alignment
+Employee-level attrition risk is aggregated to:
+- Business-unit and period level
+- Selected business KPIs for exposure analysis
+
+This alignment:
+- Surfaces where workforce risk and business outcomes co-move
+- Supports prioritization and scenario discussion
+- Does **not** claim causal attribution or revenue impact
 
 ---
 
 ## Outputs and Artifacts
 
+All outputs are written as Excel files to support direct review by HR, Finance, and Operations stakeholders.
+
 | File | Description |
 |----|----|
-| `artifacts/employee_period_panel.csv` | Time-aware employee-period panel used for training and scoring |
-| `data/employee_period_signals_full.csv` | Full-history signals layer aligned to the panel |
-| `artifacts/panel_scored.csv` | Panel with features and attrition risk scores |
-| `artifacts/panel_scores_min.csv` | Minimal scoring output for operational use |
-| `artifacts/join_quality_report.csv` | Match rate and non-null diagnostics for key signals (recommended) |
+| `employees.xlsx` | Employee master data |
+| `comp_history.xlsx` | Compensation history by employee-period |
+| `perf_history.xlsx` | Performance history by employee-period |
+| `panel_scored.xlsx` | Employee-period panel with attrition risk scores |
+| `panel_scores_min.xlsx` | Minimal employee-period risk output for operational use |
+| `bu_period_features.xlsx` | Aggregated business-unit period features derived from employee risk |
+| `bu_period_scored.xlsx` | Business-unit period attrition risk scores |
+| `bu_period_kpi_scored.xlsx` | Business-unit risk aligned to selected KPIs |
+| `business_kpi.xlsx` | Business KPI reference data |
+| `kpi_impact_output.xlsx` | KPI exposure signals associated with workforce risk |
+| `kpi_impact_summary.xlsx` | Executive-level KPI risk summary |
 
 ---
 
 ## Typical Pipeline Flow
 
-1. Load or build the employee-period panel  
-2. Check for signals file  
-   - If missing, build full-history signals  
-3. Validate:
-   - Date range coverage
-   - Employee-period key match rate
-   - Non-null rates for critical fields  
-4. Train or load model  
-5. Score attrition risk  
-6. Write operational artifacts  
+1. Load employee, compensation, performance, and KPI data  
+2. Construct or validate employee-period panel  
+3. Validate joins and signal coverage  
+4. Train or load attrition risk model  
+5. Score employee-period attrition risk  
+6. Aggregate risk to business-unit and period level  
+7. Align aggregated risk to selected KPIs  
+8. Write operational and executive-ready artifacts  
 
 ---
 
-## Example: Join Integrity Checks
+## Example: Join Integrity Validation
 
 ```python
-panel = pd.read_csv("artifacts/employee_period_panel.csv")
-signals = pd.read_csv("data/employee_period_signals_full.csv")
+panel = pd.read_excel("panel_scored.xlsx")
+comp = pd.read_excel("comp_history.xlsx")
 
 panel_keys = panel[["employee_id","period_start"]].drop_duplicates()
-sig_keys = signals[["employee_id","period_start"]].drop_duplicates()
+comp_keys = comp[["employee_id","period_start"]].drop_duplicates()
 
 match = panel_keys.merge(
-    sig_keys,
+    comp_keys,
     on=["employee_id","period_start"],
     how="left",
     indicator=True
 )
 
 match_rate = (match["_merge"] == "both").mean()
-print(f"Signals key match rate: {match_rate:.3f}")
+print(f"Compensation key match rate: {match_rate:.3f}")
