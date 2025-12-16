@@ -9,11 +9,7 @@ It is built to run end-to-end in real operating environments, producing **action
 
 ## What Attrition Signal Engine Solves
 
-Most attrition models fail in production due to:
-- Missing or partial feature files
-- Silent join failures
-- Misaligned time windows
-- Outputs that are not operationally usable
+“Here is where attrition risk is rising, here is where it is concentrated, and here is where those risk concentrations align with business KPIs that leadership cares about.”
 
 Attrition Signal Engine addresses these failure modes directly by prioritizing **robust execution, explicit validation, and usable outputs**.
 
