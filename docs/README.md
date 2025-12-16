@@ -11,6 +11,36 @@ It is built to run end-to-end in real operating environments, producing **action
 
 “Here is where attrition risk is rising, here is where it is concentrated, and here is where those risk concentrations align with business KPIs that leadership cares about.”
 
+**What the model does clarify about attrition risk to KPIs**
+It clarifies alignment and exposure
+
+This model shows:
+
+  - Where attrition risk is elevated
+  - Where that elevation clusters by BU and period
+  - Where those clusters coincide with KPI pressure
+
+**It clarifies relative risk, not absolute impact**
+
+The model allows leaders to compare:
+
+- Unit A vs Unit B
+- Period-over-period changes
+- Rising vs stable risk areas
+
+This supports prioritization:
+
+ - Where to intervene first
+ - Where to monitor
+ - Where to investigate root causes
+
+**It clarifies timing**
+
+Because attrition risk is a leading indicator:
+
+ - It often rises before KPI degradation
+ - It gives leaders earlier warning than lagging KPI dashboards
+
 Attrition Signal Engine addresses these failure modes directly by prioritizing **robust execution, explicit validation, and usable outputs**.
 
 It answers questions leaders actually ask:
